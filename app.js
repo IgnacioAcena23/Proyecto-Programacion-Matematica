@@ -656,6 +656,7 @@ class NexusCoreApp {
     }
 
     exportPDF(type) {
+
         let sol = null;
         let title = "";
         let inputHtml = "";
@@ -666,10 +667,7 @@ class NexusCoreApp {
 
         if (type === 'transport') {
             sol = this.transportManager.lastSolution;
-            if (!sol) {
-                alert("Primero debes optimizar el problema para exportar el reporte.");
-                return;
-            }
+            if (!sol) { alert("Primero debes optimizar el problema."); return; }
             title = "Reporte de Optimización Logística y Transporte";
 
             const data = sol.problemData;
@@ -680,22 +678,14 @@ class NexusCoreApp {
             let tableRows = "";
             for (let i = 0; i < m; i++) {
                 tableRows += `<tr><td style="font-weight:bold;">${data.originNames[i]}</td>`;
-                for (let j = 0; j < n; j++) {
-                    tableRows += `<td>${data.costs[i][j]}</td>`;
-                }
-                tableRows += `<td style="color:#10b981; font-weight:bold;">${data.supply[i]}</td></tr>`;
+                for (let j = 0; j < n; j++) tableRows += `<td>${data.costs[i][j]}</td>`;
+                tableRows += `<td style="color:#10b981; font-weight:bold;">${data.supply[i]}</td>`;
             }
-            tableRows += `<tr><td style="font-weight:bold;">Demanda</td>` + data.demand.map(d => `<td style="color:#f59e0b; font-weight:bold;">${d}</td>`).join('') + `<td>—</td></tr>`;
-
-            inputHtml = `
-                <table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:12px; border:1px solid #cbd5e1;" border="1" cellpadding="6">
-                    <thead><tr style="background-color:#f1f5f9; color:#1e293b;">${tableHeaders}</td></thead>
-                    <tbody>${tableRows}</tbody>
-                </table>
-            `;
+            tableRows += `<tr><td style="font-weight:bold;">Demanda</td>` + data.demand.map(d => `<td style="color:#f59e0b; font-weight:bold;">${d}</td>`).join('') + `<td>—</td>`;
+            inputHtml = `<table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:12px; border:1px solid #cbd5e1;" border="1" cellpadding="6"><thead><tr style="background-color:#f1f5f9; color:#1e293b;">${tableHeaders}<tr></thead><tbody>${tableRows}</tbody></td>`;
 
             const res = sol.solutionData;
-            iterationsHtml = `<ul style="font-size:10px; line-height:1.4; color:#334155; padding-left:20px; font-family:sans-serif;">`;
+            iterationsHtml = `<ul style="font-size:10px; line-height:1.4; color:#334155; padding-left:20px;">`;
             res.steps.forEach(step => {
                 iterationsHtml += `<li style="margin-bottom:4px;"><strong>Paso ${step.num}:</strong> ${step.text} ➔ Cantidad: ${step.qty} (costo: ${formatCurrency(step.cost)}) | Subtotal: ${formatCurrency(step.subtotal)}</li>`;
             });
@@ -703,7 +693,6 @@ class NexusCoreApp {
 
             const rows = res.balancedCosts.length;
             const cols = res.balancedCosts[0].length;
-
             let outHeaders = `<th></th>` + res.destNames.map(d => `<th>${d}</th>`).join('') + `<th>Oferta</th>`;
             let outRows = "";
             for (let i = 0; i < rows; i++) {
@@ -711,11 +700,8 @@ class NexusCoreApp {
                 for (let j = 0; j < cols; j++) {
                     const qty = res.assignments[i][j];
                     const cost = res.balancedCosts[i][j];
-                    if (qty > 0) {
-                        outRows += `<td style="background-color:#d1fae5; font-weight:bold; color:#065f46;">${cost} <span style="font-size:10px; color:#047857; font-weight:normal; margin-left:4px;">(${qty} uds)</span></td>`;
-                    } else {
-                        outRows += `<td>${cost}</td>`;
-                    }
+                    if (qty > 0) outRows += `<td style="background-color:#d1fae5; font-weight:bold; color:#065f46;">${cost} <span style="font-size:10px;">(${qty} uds)</span></td>`;
+                    else outRows += `<td>${cost}</td>`;
                 }
                 const initialSupply = i < m ? data.supply[i] : res.steps.find(s => s.text.includes(res.originNames[i]))?.qty || 0;
                 outRows += `<td>${initialSupply}</td>`;
@@ -724,59 +710,28 @@ class NexusCoreApp {
                 const initialDemand = j < n ? data.demand[j] : res.steps.find(s => s.text.includes(d))?.qty || 0;
                 return `<td style="font-weight:bold;">${initialDemand}</td>`;
             }).join('') + `<td>—</td>`;
+            outputHtml = `<table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:12px; border:1px solid #cbd5e1;" border="1" cellpadding="6"><thead><tr style="background-color:#f1f5f9; color:#1e293b;">${outHeaders}</td></thead><tbody>${outRows}</tbody></table>`;
 
-            outputHtml = `
-                <table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:12px; border:1px solid #cbd5e1;" border="1" cellpadding="6">
-                    <thead><tr style="background-color:#f1f5f9; color:#1e293b;">${outHeaders}<tr></thead>
-                    <tbody>${outRows}</tbody>
-                </table>
-            `;
-
-            metricHtml = `
-                <div style="display:flex; gap:20px; margin-top:15px; margin-bottom:15px;">
-                    <div style="flex:1; border:1px solid #cbd5e1; padding:12px; border-radius:6px; background-color:#f8fafc; font-family:sans-serif;">
-                        <span style="font-size:9px; color:#64748b; font-weight:bold; text-transform:uppercase;">Método Utilizado</span><br>
-                        <strong style="font-size:15px; color:#1e293b;">${sol.methodName}</strong>
-                    </div>
-                    <div style="flex:1; border:1px solid #cbd5e1; padding:12px; border-radius:6px; background-color:#ecfdf5; font-family:sans-serif;">
-                        <span style="font-size:9px; color:#047857; font-weight:bold; text-transform:uppercase;">Costo Total Mínimo</span><br>
-                        <strong style="font-size:17px; color:#059669;">${formatCurrency(res.totalCost)}</strong>
-                    </div>
-                </div>
-            `;
-
+            metricHtml = `<div style="display:flex; gap:20px; margin:15px 0;"><div style="flex:1; border:1px solid #cbd5e1; padding:12px; border-radius:6px; background-color:#f8fafc;"><span style="font-size:9px; color:#64748b; font-weight:bold;">Método Utilizado</span><br><strong style="font-size:15px;">${sol.methodName}</strong></div><div style="flex:1; border:1px solid #cbd5e1; padding:12px; border-radius:6px; background-color:#ecfdf5;"><span style="font-size:9px; color:#047857; font-weight:bold;">Costo Total Mínimo</span><br><strong style="font-size:17px; color:#059669;">${formatCurrency(res.totalCost)}</strong></div></div>`;
             aiHtml = document.getElementById('trans-coo-report-text').innerHTML;
-
         } else {
             sol = this.assignmentManager.lastSolution;
-            if (!sol) {
-                alert("Primero debes optimizar el problema para exportar el reporte.");
-                return;
-            }
+            if (!sol) { alert("Primero debes optimizar el problema."); return; }
             title = "Reporte de Asignación y Optimización de Talento";
 
             const data = sol.problemData;
             const N = data.matrix.length;
-
             let tableHeaders = `<th></th>` + data.taskNames.map(t => `<th>${t}</th>`).join('');
             let tableRows = "";
             for (let i = 0; i < N; i++) {
                 tableRows += `<tr><td style="font-weight:bold;">${data.personNames[i]}</td>`;
-                for (let j = 0; j < N; j++) {
-                    tableRows += `<td>${data.matrix[i][j]}</td>`;
-                }
+                for (let j = 0; j < N; j++) tableRows += `<td>${data.matrix[i][j]}</td>`;
                 tableRows += `</tr>`;
             }
-
-            inputHtml = `
-                <table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:12px; border:1px solid #cbd5e1;" border="1" cellpadding="6">
-                    <thead><tr style="background-color:#f1f5f9; color:#1e293b;">${tableHeaders}</tr></thead>
-                    <tbody>${tableRows}</tbody>
-                </table>
-            `;
+            inputHtml = `<table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:12px; border:1px solid #cbd5e1;" border="1" cellpadding="6"><thead><tr style="background-color:#f1f5f9; color:#1e293b;">${tableHeaders}<tr></thead><tbody>${tableRows}</tbody></table>`;
 
             const res = sol.solutionData;
-            iterationsHtml = `<ul style="font-size:10px; line-height:1.4; color:#334155; padding-left:20px; font-family:sans-serif;">`;
+            iterationsHtml = `<ul style="font-size:10px; line-height:1.4; color:#334155; padding-left:20px;">`;
             res.assignments.forEach(([r, c]) => {
                 const namePerson = data.personNames[r];
                 const nameTask = data.taskNames[c];
@@ -792,115 +747,118 @@ class NexusCoreApp {
                 for (let j = 0; j < N; j++) {
                     const val = data.matrix[i][j];
                     const isAssigned = res.assignments.some(([ar, ac]) => ar === i && ac === j);
-                    if (isAssigned) {
-                        outRows += `<td style="background-color:#e0e7ff; font-weight:bold; color:#3730a3; border:2px solid #6366f1;">${val} <span style="font-size:10px; color:#4f46e5; font-weight:normal; margin-left:4px;">(✓)</span></td>`;
-                    } else {
-                        outRows += `<td>${val}</td>`;
-                    }
+                    if (isAssigned) outRows += `<td style="background-color:#e0e7ff; font-weight:bold; border:2px solid #6366f1;">${val} ✓</td>`;
+                    else outRows += `<td>${val}</td>`;
                 }
                 outRows += `</tr>`;
             }
+            outputHtml = `<table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:12px; border:1px solid #cbd5e1;" border="1" cellpadding="6"><thead><tr style="background-color:#f1f5f9; color:#1e293b;">${outHeaders}</tr></thead><tbody>${outRows}</tbody></table>`;
 
-            outputHtml = `
-                <table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:12px; border:1px solid #cbd5e1;" border="1" cellpadding="6">
-                    <thead><tr style="background-color:#f1f5f9; color:#1e293b;">${outHeaders}</tr></thead>
-                    <tbody>${outRows}</tbody>
-                </table>
-            `;
-
-            metricHtml = `
-                <div style="display:flex; gap:20px; margin-top:15px; margin-bottom:15px;">
-                    <div style="flex:1; border:1px solid #cbd5e1; padding:12px; border-radius:6px; background-color:#f8fafc; font-family:sans-serif;">
-                        <span style="font-size:9px; color:#64748b; font-weight:bold; text-transform:uppercase;">Objetivo</span><br>
-                        <strong style="font-size:15px; color:#1e293b;">${sol.criterion === 'minimize' ? 'Minimizar Costo/Tiempo' : 'Maximizar Aptitud/Talento'}</strong>
-                    </div>
-                    <div style="flex:1; border:1px solid #cbd5e1; padding:12px; border-radius:6px; background-color:#e0e7ff; font-family:sans-serif;">
-                        <span style="font-size:9px; color:#4f46e5; font-weight:bold; text-transform:uppercase;">Valor Óptimo Evaluado</span><br>
-                        <strong style="font-size:17px; color:#4f46e5;">${res.totalValue}</strong>
-                    </div>
-                </div>
-            `;
-
+            metricHtml = `<div style="display:flex; gap:20px; margin:15px 0;"><div style="flex:1; border:1px solid #cbd5e1; padding:12px; border-radius:6px; background-color:#f8fafc;"><span style="font-size:9px; color:#64748b; font-weight:bold;">Objetivo</span><br><strong>${sol.criterion === 'minimize' ? 'Minimizar Costo/Tiempo' : 'Maximizar Aptitud/Talento'}</strong></div><div style="flex:1; border:1px solid #cbd5e1; padding:12px; border-radius:6px; background-color:#e0e7ff;"><span style="font-size:9px; color:#4f46e5; font-weight:bold;">Valor Óptimo Evaluado</span><br><strong style="font-size:17px; color:#4f46e5;">${res.totalValue}</strong></div></div>`;
             aiHtml = document.getElementById('assign-coo-report-text').innerHTML;
         }
 
-        const tempReport = document.createElement('div');
-        tempReport.style.padding = "35px";
-        tempReport.style.fontFamily = "Arial, sans-serif";
-        tempReport.style.color = "#1e293b";
-        tempReport.style.backgroundColor = "#ffffff";
-
+        // Construir HTML completo para la ventana emergente
         const timestamp = new Date().toLocaleString('es-ES');
-
-        tempReport.innerHTML = `
-            <!-- Corporate Header -->
-            <div style="border-bottom:3px solid #1e3a8a; padding-bottom:15px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; font-family:sans-serif;">
+        const fullHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>${title} - NexusCore Systems</title>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+            <style>
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body {
+                    font-family: Arial, sans-serif;
+                    background-color: #ffffff;
+                    color: #1e293b;
+                    padding: 35px;
+                    max-width: 800px;
+                    margin: 0 auto;
+                }
+                h1 { font-size: 24px; color: #1e3a8a; margin-bottom: 5px; }
+                .subtitle { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
+                .header { border-bottom: 3px solid #1e3a8a; padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+                .title-section h2 { font-size: 18px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-top: 0; margin-bottom: 15px; text-transform: uppercase; }
+                table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px; border: 1px solid #cbd5e1; }
+                th, td { border: 1px solid #cbd5e1; padding: 6px; text-align: center; }
+                th { background-color: #f1f5f9; font-weight: bold; }
+                .metric-card { flex: 1; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; }
+                .flex { display: flex; gap: 20px; margin: 15px 0; }
+                .bg-success-light { background-color: #ecfdf5; }
+                .bg-indigo-light { background-color: #e0e7ff; }
+                .assigned-cell { background-color: #d1fae5; font-weight: bold; color: #065f46; }
+                .assigned-cell-indigo { background-color: #e0e7ff; font-weight: bold; border: 2px solid #6366f1; }
+                ul { font-size: 10px; line-height: 1.4; color: #334155; padding-left: 20px; margin: 8px 0; }
+                li { margin-bottom: 4px; }
+                .footer { margin-top: 35px; border-top: 1px solid #cbd5e1; padding-top: 10px; text-align: center; font-size: 8px; color: #94a3b8; }
+                #status { text-align: center; margin-top: 20px; font-size: 12px; color: #059669; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
                 <div>
-                    <h1 style="margin:0; font-size:24px; color:#1e3a8a; font-weight:bold; letter-spacing:-0.5px;">NexusCore Systems</h1>
-                    <span style="font-size:10px; color:#64748b; letter-spacing:1px; font-weight:bold; text-transform:uppercase;">Plataforma de Optimización Operacional</span>
+                    <h1>NexusCore Systems</h1>
+                    <div class="subtitle">Plataforma de Optimización Operacional</div>
                 </div>
-                <div style="text-align:right; font-size:9px; color:#64748b; line-height:1.4;">
+                <div style="text-align:right; font-size:9px; color:#64748b;">
                     <strong>Documento de Planificación de Operaciones</strong><br>
                     Fecha: ${timestamp}<br>
                     Modelo Analítico: Groq llama-3.1-8b-instant
                 </div>
             </div>
-            
-            <h2 style="font-size:18px; color:#0f172a; margin-top:0; margin-bottom:15px; border-bottom:1px solid #e2e8f0; padding-bottom:5px; font-family:sans-serif; text-transform:uppercase;">${title}</h2>
-            
-            <!-- Metric summary cards -->
+            <div class="title-section">
+                <h2>${title}</h2>
+            </div>
             ${metricHtml}
-            
-            <!-- Input Table Section -->
-            <div style="margin-top:20px;">
-                <h3 style="font-size:13px; color:#1e3a8a; margin-bottom:4px; text-transform:uppercase; border-left:3px solid #1e3a8a; padding-left:8px; font-family:sans-serif;">1. Datos de Entrada del Usuario</h3>
-                <p style="font-size:10px; color:#64748b; margin-top:2px; margin-bottom:8px; font-family:sans-serif;">Matriz de tarifas y restricciones cargadas en el navegador.</p>
-                ${inputHtml}
+            <h3>1. Datos de Entrada del Usuario</h3>
+            <p style="font-size:10px; color:#64748b; margin-bottom:8px;">Matriz de tarifas y restricciones cargadas en el navegador.</p>
+            ${inputHtml}
+            <h3>2. Iteraciones y Pasos de Resolución</h3>
+            <p style="font-size:10px; color:#64748b; margin-bottom:8px;">Desglose de los emparejamientos y asignaciones realizados por el algoritmo.</p>
+            ${iterationsHtml}
+            <h3>3. Matriz de Resultados Final</h3>
+            <p style="font-size:10px; color:#64748b; margin-bottom:8px;">Flujo óptimo y matriz resultante.</p>
+            ${outputHtml}
+            <h3>4. Análisis y Conclusión Final (COO / Groq IA)</h3>
+            <div style="background-color:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; padding:15px; font-size:11px; line-height:1.6;">
+                ${aiHtml || "<p style='color:#64748b; font-style:italic;'>No se realizó análisis cualitativo mediante Groq para este cálculo.</p>"}
             </div>
-            
-            <!-- Iterations Section -->
-            <div style="margin-top:25px; page-break-inside:avoid;">
-                <h3 style="font-size:13px; color:#1e3a8a; margin-bottom:4px; text-transform:uppercase; border-left:3px solid #1e3a8a; padding-left:8px; font-family:sans-serif;">2. Iteraciones y Pasos de Resolución</h3>
-                <p style="font-size:10px; color:#64748b; margin-top:2px; margin-bottom:8px; font-family:sans-serif;">Desglose de los emparejamientos y asignaciones realizados por el algoritmo.</p>
-                ${iterationsHtml}
-            </div>
-            
-            <!-- Output Solution Section -->
-            <div style="margin-top:25px; page-break-inside:avoid;">
-                <h3 style="font-size:13px; color:#1e3a8a; margin-bottom:4px; text-transform:uppercase; border-left:3px solid #1e3a8a; padding-left:8px; font-family:sans-serif;">3. Matriz de Resultados Final</h3>
-                <p style="font-size:10px; color:#64748b; margin-top:2px; margin-bottom:8px; font-family:sans-serif;">Flujo óptimo y matriz resultante.</p>
-                ${outputHtml}
-            </div>
-            
-            <!-- AI Analysis Section -->
-            <div style="margin-top:30px; border-top:1px solid #cbd5e1; padding-top:15px; page-break-inside:avoid;">
-                <h3 style="font-size:13px; color:#1e3a8a; margin-bottom:10px; text-transform:uppercase; border-left:3px solid #1e3a8a; padding-left:8px; font-family:sans-serif;">
-                    4. Análisis y Conclusión Final (COO / Groq IA)
-                </h3>
-                <div style="background-color:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; padding:18px; font-size:11px; line-height:1.6; color:#334155; font-family:sans-serif;">
-                    ${aiHtml || "<p style='color:#64748b; font-style:italic;'>No se realizó análisis cualitativo mediante Groq para este cálculo.</p>"}
-                </div>
-            </div>
-            
-            <!-- Footer -->
-            <div style="margin-top:35px; border-top:1px solid #cbd5e1; padding-top:10px; text-align:center; font-size:8px; color:#94a3b8; font-family:sans-serif;">
+            <div class="footer">
                 Este informe contiene análisis confidencial derivado en tiempo real por NexusCore Systems. © 2026. Todos los derechos reservados.
             </div>
-        `;
+            <script>
+                window.onload = function() {
+                    const element = document.body;
+                    const opt = {
+                        margin: 15,
+                        filename: 'NexusCore_Reporte_${type}_${new Date().toISOString().slice(0, 19)}.pdf',
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 2, useCORS: true, logging: false },
+                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                    };
+                    html2pdf().set(opt).from(element).save().then(() => {
+                        document.getElementById('status').innerHTML = 'PDF generado correctamente. Cerrando ventana...';
+                        setTimeout(() => window.close(), 1500);
+                    }).catch(err => {
+                        document.getElementById('status').innerHTML = 'Error al generar PDF: ' + err.message;
+                        console.error(err);
+                    });
+                };
+            </script>
+        </body>
+        </html>
+    `;
 
-        document.body.appendChild(tempReport);
-
-        const opt = {
-            margin: 15,
-            filename: `NexusCore_Reporte_${type}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true, logging: false },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-
-        html2pdf().set(opt).from(tempReport).save().then(() => {
-            document.body.removeChild(tempReport);
-        });
+        // Abrir ventana emergente
+        const pdfWindow = window.open('', '_blank');
+        if (!pdfWindow) {
+            alert("Por favor, permite ventanas emergentes para generar el PDF.");
+            return;
+        }
+        pdfWindow.document.write(fullHtml);
+        pdfWindow.document.close();
     }
 }
 
