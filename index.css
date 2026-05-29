@@ -1,4 +1,3 @@
-/* Reset & Global Styles */
 * {
     margin: 0;
     padding: 0;
@@ -12,19 +11,19 @@
     --border-color: #242c47;
     --text-main: #f1f5f9;
     --text-muted: #64748b;
-    
-    --primary: #10b981; /* Emerald for Transport */
+
+    --primary: #10b981;
     --primary-glow: rgba(16, 185, 129, 0.15);
-    
-    --secondary: #6366f1; /* Indigo for Assignment */
+
+    --secondary: #6366f1;
     --secondary-glow: rgba(99, 102, 241, 0.15);
-    
-    --accent: #f59e0b; /* Amber */
-    --danger: #ef4444; /* Red */
-    
+
+    --accent: #f59e0b;
+    --danger: #ef4444;
+
     --font-heading: 'Outfit', sans-serif;
     --font-body: 'Inter', sans-serif;
-    
+
     --sidebar-width: 260px;
     --transition-speed: 0.3s;
 }
@@ -38,30 +37,30 @@ body {
     overflow-x: hidden;
 }
 
-/* Scrollbar Styles */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
 }
+
 ::-webkit-scrollbar-track {
     background: var(--bg-main);
 }
+
 ::-webkit-scrollbar-thumb {
     background: var(--border-color);
     border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
     background: var(--text-muted);
 }
 
-/* App Container Layout */
 .app-container {
     display: flex;
     width: 100%;
     min-height: 100vh;
 }
 
-/* Sidebar Styling */
 .app-sidebar {
     width: var(--sidebar-width);
     background-color: #080c14;
@@ -181,17 +180,15 @@ body {
     background-color: var(--text-muted);
 }
 
-/* Main Content Area */
 .app-main {
     flex-grow: 1;
     margin-left: var(--sidebar-width);
     padding: 40px;
     display: flex;
     flex-direction: column;
-    min-width: 0; /* Prevents flex items from overflowing */
+    min-width: 0;
 }
 
-/* Header Section */
 .app-header {
     display: flex;
     justify-content: space-between;
@@ -224,7 +221,6 @@ body {
     margin-bottom: 4px;
 }
 
-/* View Section Control */
 .view-section {
     display: none;
     opacity: 0;
@@ -236,14 +232,12 @@ body {
     opacity: 1;
 }
 
-/* Grid Layout for Panels */
 .grid-layout {
     display: grid;
     grid-template-columns: repeat(12, 1fr);
     gap: 24px;
 }
 
-/* Panel & Card Designs */
 .panel {
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -274,7 +268,6 @@ body {
     margin-bottom: 0;
 }
 
-/* Card Column Layouts */
 .config-card {
     grid-column: span 4;
 }
@@ -295,7 +288,6 @@ body {
     grid-column: span 12;
 }
 
-/* Form inputs & Buttons */
 .form-group {
     display: flex;
     flex-direction: column;
@@ -337,7 +329,6 @@ body {
     flex: 1;
 }
 
-/* General Button Styling */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -404,10 +395,14 @@ body {
     width: 100%;
 }
 
-.mt-2 { margin-top: 8px; }
-.mt-4 { margin-top: 16px; }
+.mt-2 {
+    margin-top: 8px;
+}
 
-/* Real-Time Balance Widget */
+.mt-4 {
+    margin-top: 16px;
+}
+
 .balance-widget {
     background-color: rgba(255, 255, 255, 0.01);
     border: 1px dashed var(--border-color);
@@ -468,7 +463,6 @@ body {
     padding-top: 8px;
 }
 
-/* Toggle buttons */
 .toggle-group {
     display: flex;
     background-color: rgba(255, 255, 255, 0.02);
@@ -497,7 +491,6 @@ body {
     color: #fff;
 }
 
-/* Dynamic Grid Inputs Matrix Table */
 .matrix-wrapper {
     overflow-x: auto;
     width: 100%;
@@ -567,7 +560,7 @@ body {
     font-weight: 600;
 }
 
-.matrix-table th.dummy, 
+.matrix-table th.dummy,
 .matrix-table td.dummy {
     background-color: rgba(255, 255, 255, 0.01) !important;
 }
@@ -576,7 +569,6 @@ body {
     color: var(--text-muted) !important;
 }
 
-/* Solver selector grid */
 .solver-select-group {
     display: flex;
     flex-direction: column;
@@ -643,7 +635,6 @@ body {
     line-height: 1.5;
 }
 
-/* Results Display Elements */
 .results-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -682,8 +673,13 @@ body {
     font-family: var(--font-heading);
 }
 
-.text-emerald { color: var(--primary); }
-.text-indigo { color: var(--secondary); }
+.text-emerald {
+    color: var(--primary);
+}
+
+.text-indigo {
+    color: var(--secondary);
+}
 
 .steps-container h4,
 .results-visual h4 {
@@ -731,7 +727,6 @@ body {
     color: var(--text-muted);
 }
 
-/* Matrix Highlighting for solved values */
 .matrix-table td.assigned-cell {
     background-color: var(--primary-glow) !important;
     border: 1.5px solid var(--primary) !important;
@@ -959,7 +954,7 @@ body {
     display: inline-block;
     width: 24px;
     height: 24px;
-    border: 3px solid rgba(255,255,255,.1);
+    border: 3px solid rgba(255, 255, 255, .1);
     border-radius: 50%;
     border-top-color: var(--secondary);
     animation: spin 1s ease-in-out infinite;
@@ -967,15 +962,20 @@ body {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Responsive adjust */
 @media (max-width: 1024px) {
-    .config-card, .grid-card, .solver-card {
+
+    .config-card,
+    .grid-card,
+    .solver-card {
         grid-column: span 12;
     }
-    
+
     .results-grid {
         grid-template-columns: 1fr;
     }
@@ -985,7 +985,7 @@ body {
     body {
         flex-direction: column;
     }
-    
+
     .app-sidebar {
         width: 100%;
         height: auto;
@@ -994,12 +994,12 @@ body {
         border-right: none;
         border-bottom: 1px solid var(--border-color);
     }
-    
+
     .app-main {
         margin-left: 0;
         padding: 20px;
     }
-    
+
     .ai-drawer {
         width: 100%;
         right: -100%;

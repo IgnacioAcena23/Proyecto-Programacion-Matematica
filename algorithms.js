@@ -1,24 +1,13 @@
-/**
- * NexusCore Systems - Optimización de Logística y Talento
- * algorithms.js - Contiene los modelos y solvers para transporte y asignación.
- */
-
-// =============================================================================
-//  CLASES DE LOGÍSTICA DE TRANSPORTE
-// =============================================================================
-
 class TransportProblem {
     constructor(costs, supply, demand, originNames = null, destNames = null) {
         this.costs = costs.map(row => [...row]); // Matriz m x n
         this.supply = [...supply];               // Capacidad de orígenes
         this.demand = [...demand];               // Demanda de destinos
-        
+
         this.m = costs.length;
         this.n = costs[0].length;
-
-        // Nombres predeterminados si no se ingresan
-        this.originNames = originNames ? [...originNames] : Array.from({length: this.m}, (_, i) => `Origen ${i + 1}`);
-        this.destNames = destNames ? [...destNames] : Array.from({length: this.n}, (_, j) => `Destino ${j + 1}`);
+        this.originNames = originNames ? [...originNames] : Array.from({ length: this.m }, (_, i) => `Origen ${i + 1}`);
+        this.destNames = destNames ? [...destNames] : Array.from({ length: this.n }, (_, j) => `Destino ${j + 1}`);
     }
 
     isBalanced() {
@@ -36,25 +25,23 @@ class TransportProblem {
         let balancedDemand = [...this.demand];
         let balancedOrigins = [...this.originNames];
         let balancedDests = [...this.destNames];
-        
+
         let dummyRowAdded = false;
         let dummyColAdded = false;
 
         if (sumSupply > sumDemand) {
-            // Oferta > Demanda -> Agregar destino ficticio
             const diff = sumSupply - sumDemand;
             balancedDemand.push(diff);
             balancedDests.push("Destino Ficticio");
             for (let i = 0; i < this.m; i++) {
-                balancedCosts[i].push(0); // Costo cero a destino ficticio
+                balancedCosts[i].push(0);
             }
             dummyColAdded = true;
         } else if (sumDemand > sumSupply) {
-            // Demanda > Oferta -> Agregar origen ficticio
             const diff = sumDemand - sumSupply;
             balancedSupply.push(diff);
             balancedOrigins.push("Origen Ficticio");
-            balancedCosts.push(new Array(this.n).fill(0)); // Costo cero desde origen ficticio
+            balancedCosts.push(new Array(this.n).fill(0));
             dummyRowAdded = true;
         }
 
@@ -75,20 +62,20 @@ class NorthwestCornerSolver {
         const data = problem.getBalancedData();
         const rows = data.costs.length;
         const cols = data.costs[0].length;
-        
-        const assignments = Array.from({length: rows}, () => new Array(cols).fill(0));
+
+        const assignments = Array.from({ length: rows }, () => new Array(cols).fill(0));
         const steps = [];
-        
+
         let of = [...data.supply];
         let dem = [...data.demand];
-        
+
         let i = 0, j = 0;
         let stepCount = 1;
-        
+
         while (i < rows && j < cols) {
             const qty = Math.min(of[i], dem[j]);
             assignments[i][j] = qty;
-            
+
             steps.push({
                 num: stepCount++,
                 text: `${data.originNames[i]} ➔ ${data.destNames[j]}`,
@@ -97,14 +84,14 @@ class NorthwestCornerSolver {
                 subtotal: qty * data.costs[i][j],
                 detail: `Asignado min(Oferta=${of[i] + qty}, Demanda=${dem[j] + qty}) = ${qty}`
             });
-            
+
             of[i] -= qty;
             dem[j] -= qty;
-            
+
             if (of[i] === 0) i++;
             if (dem[j] === 0) j++;
         }
-        
+
         const totalCost = assignments.reduce((sum, row, r) => {
             return sum + row.reduce((rowSum, val, c) => rowSum + (val * data.costs[r][c]), 0);
         }, 0);
@@ -127,13 +114,13 @@ class LeastCostSolver {
         const data = problem.getBalancedData();
         const rows = data.costs.length;
         const cols = data.costs[0].length;
-        
-        const assignments = Array.from({length: rows}, () => new Array(cols).fill(0));
+
+        const assignments = Array.from({ length: rows }, () => new Array(cols).fill(0));
         const steps = [];
-        
+
         let of = [...data.supply];
         let dem = [...data.demand];
-        
+
         const rowsTachadas = new Set();
         const colsTachadas = new Set();
         let stepCount = 1;
@@ -141,8 +128,7 @@ class LeastCostSolver {
         while (rowsTachadas.size < rows && colsTachadas.size < cols) {
             let minCosto = Infinity;
             let fMin = -1, cMin = -1;
-            
-            // Buscar la celda con menor costo activa
+
             for (let r = 0; r < rows; r++) {
                 if (rowsTachadas.has(r)) continue;
                 for (let c = 0; c < cols; c++) {
@@ -154,12 +140,12 @@ class LeastCostSolver {
                     }
                 }
             }
-            
+
             if (fMin === -1) break;
-            
+
             const qty = Math.min(of[fMin], dem[cMin]);
             assignments[fMin][cMin] = qty;
-            
+
             steps.push({
                 num: stepCount++,
                 text: `${data.originNames[fMin]} ➔ ${data.destNames[cMin]}`,
@@ -168,12 +154,11 @@ class LeastCostSolver {
                 subtotal: qty * minCosto,
                 detail: `Costo mínimo global encontrado: ${minCosto}. Se asignaron ${qty} unidades.`
             });
-            
+
             of[fMin] -= qty;
             dem[cMin] -= qty;
-            
+
             if (of[fMin] === 0 && dem[cMin] === 0) {
-                // Convención: tachar fila
                 rowsTachadas.add(fMin);
             } else if (of[fMin] === 0) {
                 rowsTachadas.add(fMin);
@@ -204,15 +189,15 @@ class VogelSolver {
         const data = problem.getBalancedData();
         const rows = data.costs.length;
         const cols = data.costs[0].length;
-        
-        const assignments = Array.from({length: rows}, () => new Array(cols).fill(0));
+
+        const assignments = Array.from({ length: rows }, () => new Array(cols).fill(0));
         const steps = [];
-        
+
         let of = [...data.supply];
         let dem = [...data.demand];
-        
-        let activeRows = Array.from({length: rows}, (_, i) => i);
-        let activeCols = Array.from({length: cols}, (_, j) => j);
+
+        let activeRows = Array.from({ length: rows }, (_, i) => i);
+        let activeCols = Array.from({ length: cols }, (_, j) => j);
         let stepCount = 1;
 
         const getRowPenalty = (r, currentActiveCols) => {
@@ -228,9 +213,8 @@ class VogelSolver {
         while (activeRows.length > 0 && activeCols.length > 0) {
             let maxPenalty = -1;
             let targetIdx = -1;
-            let targetType = ""; // "R" (fila) o "C" (columna)
-            
-            // Calcular penalidades para filas activas
+            let targetType = "";
+
             for (const r of activeRows) {
                 const p = getRowPenalty(r, activeCols);
                 if (p > maxPenalty) {
@@ -239,8 +223,7 @@ class VogelSolver {
                     targetType = "R";
                 }
             }
-            
-            // Calcular penalidades para columnas activas
+
             for (const c of activeCols) {
                 const p = getColPenalty(c, activeRows);
                 if (p > maxPenalty) {
@@ -249,12 +232,11 @@ class VogelSolver {
                     targetType = "C";
                 }
             }
-            
+
             let fMin = -1, cMin = -1;
-            
+
             if (targetType === "R") {
                 fMin = targetIdx;
-                // Encontrar la columna activa con menor costo en esa fila
                 let minVal = Infinity;
                 for (const c of activeCols) {
                     if (data.costs[fMin][c] < minVal) {
@@ -264,7 +246,6 @@ class VogelSolver {
                 }
             } else {
                 cMin = targetIdx;
-                // Encontrar la fila activa con menor costo en esa columna
                 let minVal = Infinity;
                 for (const r of activeRows) {
                     if (data.costs[r][cMin] < minVal) {
@@ -278,7 +259,7 @@ class VogelSolver {
 
             const qty = Math.min(of[fMin], dem[cMin]);
             assignments[fMin][cMin] = qty;
-            
+
             steps.push({
                 num: stepCount++,
                 text: `${data.originNames[fMin]} ➔ ${data.destNames[cMin]}`,
@@ -287,10 +268,10 @@ class VogelSolver {
                 subtotal: qty * data.costs[fMin][cMin],
                 detail: `Penalidad máxima en ${targetType === "R" ? "fila" : "columna"} ${data.originNames[fMin] || data.destNames[cMin]} = ${maxPenalty}. Asignado: ${qty} unidades.`
             });
-            
+
             of[fMin] -= qty;
             dem[cMin] -= qty;
-            
+
             if (of[fMin] === 0) {
                 activeRows = activeRows.filter(r => r !== fMin);
             }
@@ -316,18 +297,12 @@ class VogelSolver {
     }
 }
 
-
-// =============================================================================
-//  CLASE DE OPTIMIZACIÓN DE TALENTO (ASIGNACIÓN)
-// =============================================================================
-
 class HungarianSolver {
     static solve(originalMatrix, isMaximization = false) {
         const N = originalMatrix.length;
         let matrix = originalMatrix.map(row => [...row]);
         const steps = [];
-        
-        // ── TRANSFORMACIÓN PARA MAXIMIZACIÓN ──
+
         if (isMaximization) {
             let maxVal = -Infinity;
             for (let i = 0; i < N; i++) {
@@ -350,7 +325,7 @@ class HungarianSolver {
                 detail: `Matriz cargada correctamente para minimizar.`
             });
         }
-        
+
         // ── PASO 1: REDUCCIÓN DE FILAS ──
         for (let i = 0; i < N; i++) {
             const minVal = Math.min(...matrix[i]);
@@ -364,7 +339,7 @@ class HungarianSolver {
                 });
             }
         }
-        
+
         // ── PASO 2: REDUCCIÓN DE COLUMNAS ──
         for (let j = 0; j < N; j++) {
             let minVal = Infinity;
@@ -381,19 +356,16 @@ class HungarianSolver {
                 });
             }
         }
-        
-        // ── BUCLE PRINCIPAL DE COBERTURA Y AJUSTE ──
-        let matchedRow = new Array(N).fill(-1); // matchedRow[c] = r
-        let matchedCol = new Array(N).fill(-1); // matchedCol[r] = c
+
+        let matchedRow = new Array(N).fill(-1);
+        let matchedCol = new Array(N).fill(-1);
         let iteration = 0;
         const MAX_ITER = 100;
-        
+
         while (iteration < MAX_ITER) {
             iteration++;
-            
-            // Emparejamiento Bipartito Máximo
             const matchCount = this.maxBipartiteMatching(matrix, matchedRow, matchedCol);
-            
+
             if (matchCount === N) {
                 steps.push({
                     name: "Asignación Final Encontrada",
@@ -401,23 +373,22 @@ class HungarianSolver {
                 });
                 break;
             }
-            
-            // Teorema de Koenig para encontrar líneas de cobertura mínimas
+
             let markedRows = new Array(N).fill(false);
             let markedCols = new Array(N).fill(false);
-            
+
             // 1. Marcar filas sin emparejamiento
             for (let i = 0; i < N; i++) {
                 if (matchedCol[i] === -1) {
                     markedRows[i] = true;
                 }
             }
-            
+
             // 2. Marcar de manera recursiva
             let changed = true;
             while (changed) {
                 changed = false;
-                
+
                 // Si fila marcada tiene cero en col no marcada, marcar col
                 for (let r = 0; r < N; r++) {
                     if (markedRows[r]) {
@@ -429,7 +400,7 @@ class HungarianSolver {
                         }
                     }
                 }
-                
+
                 // Si col marcada está emparejada a fila no marcada, marcar fila
                 for (let c = 0; c < N; c++) {
                     if (markedCols[c]) {
@@ -441,7 +412,7 @@ class HungarianSolver {
                     }
                 }
             }
-            
+
             // Líneas de cobertura: filas no marcadas + columnas marcadas
             let numLines = 0;
             const coverLines = [];
@@ -455,7 +426,7 @@ class HungarianSolver {
                     coverLines.push(`Columna ${i + 1}`);
                 }
             }
-            
+
             // Buscar el menor elemento no cubierto (fila marcada, columna no marcada)
             let minUncovered = Infinity;
             for (let r = 0; r < N; r++) {
@@ -469,12 +440,11 @@ class HungarianSolver {
                     }
                 }
             }
-            
+
             if (minUncovered === Infinity || minUncovered === 0) {
                 break;
             }
-            
-            // ── AJUSTE DE LA MATRIZ ──
+
             // Restar a filas marcadas, sumar a columnas marcadas
             for (let r = 0; r < N; r++) {
                 if (markedRows[r]) {
@@ -490,13 +460,13 @@ class HungarianSolver {
                     }
                 }
             }
-            
+
             steps.push({
                 name: `Iteración ${iteration}: Ajuste matricial`,
                 detail: `Cobertura con ${numLines} líneas (${coverLines.join(', ')}). Menor no cubierto: ${minUncovered}.`
             });
         }
-        
+
         // ── PREPARAR RESULTADO FINAL ──
         const assignments = [];
         let totalValue = 0;
@@ -507,20 +477,20 @@ class HungarianSolver {
                 totalValue += originalMatrix[r][c];
             }
         }
-        
+
         return {
             assignments,
             totalValue,
             steps
         };
     }
-    
+
     // DFS para emparejamiento bipartito
     static maxBipartiteMatching(matrix, matchedRow, matchedCol) {
         const N = matrix.length;
         matchedRow.fill(-1);
         matchedCol.fill(-1);
-        
+
         let matchCount = 0;
         for (let r = 0; r < N; r++) {
             let seen = new Array(N).fill(false);
@@ -530,7 +500,7 @@ class HungarianSolver {
         }
         return matchCount;
     }
-    
+
     static dfsMatch(r, matrix, seen, matchedRow, matchedCol) {
         const N = matrix.length;
         for (let c = 0; c < N; c++) {

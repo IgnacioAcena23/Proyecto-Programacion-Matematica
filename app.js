@@ -1,31 +1,18 @@
-/**
- * NexusCore Systems - Optimización de Logística y Talento
- * app.js - Gestión de la interfaz, eventos, formularios dinámicos y Groq API.
- * 
- * MODIFICADO: Solo la conexión a Groq (carga desde config.js, sin intervención manual)
- */
-
-// Helper to format numbers as currency
 function formatCurrency(val) {
     return new Intl.NumberFormat('es-US', { style: 'currency', currency: 'USD' }).format(val);
 }
 
-// Simple Markdown parser for Groq AI responses
 function parseMarkdown(md) {
     let html = md
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
 
-    // Bold
     html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-
-    // Headings
     html = html.replace(/^###\s+(.*?)$/gm, '<h4>$1</h4>');
     html = html.replace(/^##\s+(.*?)$/gm, '<h3>$1</h3>');
     html = html.replace(/^#\s+(.*?)$/gm, '<h2>$1</h2>');
 
-    // Lists
     let inList = false;
     const lines = html.split('\n');
     for (let i = 0; i < lines.length; i++) {
@@ -50,7 +37,6 @@ function parseMarkdown(md) {
     }
     html = lines.join('\n');
 
-    // Paragraphs
     html = html.replace(/\n\n/g, '</p><p>');
     html = '<p>' + html + '</p>';
     html = html.replace(/<p>\s*<\/p>/g, '');
@@ -58,16 +44,10 @@ function parseMarkdown(md) {
     return html;
 }
 
-
-// =============================================================================
-//  GESTIÓN DE FORMULARIO DE LOGÍSTICA DE TRANSPORTE (sin cambios)
-// =============================================================================
-
 class TransportFormManager {
     constructor(app) {
         this.app = app;
 
-        // Elementos DOM
         this.originsInput = document.getElementById('trans-origins');
         this.destsInput = document.getElementById('trans-destinations');
         this.btnGenerate = document.getElementById('btn-generate-transport');
@@ -85,8 +65,6 @@ class TransportFormManager {
         this.balanceAlertText = document.getElementById('balance-alert-text');
 
         this.solverOptions = document.querySelectorAll('#view-transport .solver-option');
-
-        // Estado
         this.m = 3;
         this.n = 3;
         this.selectedMethod = 'noroeste';
@@ -110,7 +88,6 @@ class TransportFormManager {
             pdfBtn.addEventListener('click', () => this.app.exportPDF('transport'));
         }
 
-        // Manejar selección de método
         this.solverOptions.forEach(opt => {
             opt.addEventListener('click', () => {
                 this.solverOptions.forEach(o => o.classList.remove('active'));
@@ -119,14 +96,12 @@ class TransportFormManager {
             });
         });
 
-        // Generar grid inicial
         this.generateGrid();
     }
 
     generateGrid(preloadData = null) {
         let html = `<table class="matrix-table" id="trans-input-table">`;
 
-        // Fila de encabezado
         html += `<thead><tr><th></th>`;
         for (let j = 0; j < this.n; j++) {
             const destVal = preloadData ? (preloadData.destNames[j] || `Destino ${j + 1}`) : `Destino ${j + 1}`;
@@ -134,7 +109,6 @@ class TransportFormManager {
         }
         html += `<th class="header-node">Oferta</th></tr></thead><tbody>`;
 
-        // Filas de costos y oferta
         for (let i = 0; i < this.m; i++) {
             const originVal = preloadData ? (preloadData.originNames[i] || `Origen ${i + 1}`) : `Origen ${i + 1}`;
             html += `<tr><td class="header-node"><input type="text" class="node-name-input" value="${originVal}" data-type="origin" data-idx="${i}"></td>`;
@@ -146,7 +120,6 @@ class TransportFormManager {
             html += `<td class="cell-supply"><input type="number" class="cell-input cell-supply-input" value="${supplyVal}" min="0" data-row="${i}"></td></tr>`;
         }
 
-        // Fila de demanda
         html += `<tr><td class="header-node">Demanda</td>`;
         for (let j = 0; j < this.n; j++) {
             const demandVal = preloadData ? preloadData.demand[j] : 0;
@@ -156,8 +129,6 @@ class TransportFormManager {
 
         this.matrixContainer.innerHTML = html;
         this.resultsPanel.style.display = 'none';
-
-        // Escuchar cambios para calcular balance en tiempo real
         this.setupRealTimeBalance();
         this.updateBalance();
     }
@@ -255,8 +226,6 @@ class TransportFormManager {
         };
 
         this.renderResults(result);
-
-        // Optimizar y Analizar: dispara inmediatamente el análisis con IA
         this.app.runAIAnalysis();
     }
 
@@ -264,14 +233,11 @@ class TransportFormManager {
         this.resultsPanel.style.display = 'block';
         document.getElementById('res-total-cost').textContent = formatCurrency(res.totalCost);
 
-        // Contar celdas asignadas
         let assignedCount = 0;
         res.assignments.forEach(row => {
             row.forEach(val => { if (val > 0) assignedCount++; });
         });
         document.getElementById('res-cells-count').textContent = assignedCount;
-
-        // Renderizar pasos
         let stepsHtml = "";
         res.steps.forEach(step => {
             stepsHtml += `
@@ -283,8 +249,6 @@ class TransportFormManager {
             `;
         });
         this.resStepsList.innerHTML = stepsHtml;
-
-        // Renderizar matriz de resultados resaltada
         const rows = res.balancedCosts.length;
         const cols = res.balancedCosts[0].length;
 
@@ -316,12 +280,9 @@ class TransportFormManager {
                 }
             }
 
-            // Mostrar capacidad inicial
             const initialSupply = i < this.m ? this.lastSolution.problemData.supply[i] : res.steps.find(s => s.text.includes(res.originNames[i]))?.qty || 0;
             matrixHtml += `<td class="cell-supply">${initialSupply}</td></tr>`;
         }
-
-        // Fila de demanda inicial
         matrixHtml += `<tr><td class="header-node">Demanda</td>`;
         for (let j = 0; j < cols; j++) {
             const isDummyCol = res.dummyColAdded && (j === cols - 1);
@@ -331,22 +292,13 @@ class TransportFormManager {
         matrixHtml += `<td>—</td></tr></tbody></table>`;
 
         this.resMatrixContainer.innerHTML = matrixHtml;
-
-        // Scroll suave hasta los resultados
         this.resultsPanel.scrollIntoView({ behavior: 'smooth' });
     }
 }
 
-
-// =============================================================================
-//  GESTIÓN DE FORMULARIO DE ASIGNACIÓN DE TALENTO (sin cambios)
-// =============================================================================
-
 class AssignmentFormManager {
     constructor(app) {
         this.app = app;
-
-        // Elementos DOM
         this.sizeInput = document.getElementById('assign-size');
         this.btnGenerate = document.getElementById('btn-generate-assignment');
         this.btnClear = document.getElementById('btn-clear-assignment');
@@ -357,13 +309,10 @@ class AssignmentFormManager {
         this.resLabel = document.getElementById('assign-result-label');
         this.resList = document.getElementById('res-assign-list');
         this.resMatrixContainer = document.getElementById('assignment-result-matrix');
-
         this.optMinBtn = document.getElementById('btn-opt-min');
         this.optMaxBtn = document.getElementById('btn-opt-max');
-
-        // Estado
         this.N = 3;
-        this.criterion = 'minimize'; // minimize / maximize
+        this.criterion = 'minimize';
         this.lastSolution = null;
 
         this.init();
@@ -403,7 +352,6 @@ class AssignmentFormManager {
     generateGrid(preloadData = null) {
         let html = `<table class="matrix-table">`;
 
-        // Header
         html += `<thead><tr><th></th>`;
         for (let j = 0; j < this.N; j++) {
             const taskName = preloadData ? (preloadData.taskNames[j] || `Tarea ${j + 1}`) : `Tarea ${j + 1}`;
@@ -411,7 +359,6 @@ class AssignmentFormManager {
         }
         html += `</tr></thead><tbody>`;
 
-        // Rows
         for (let i = 0; i < this.N; i++) {
             const personName = preloadData ? (preloadData.personNames[i] || `Talento ${i + 1}`) : `Talento ${i + 1}`;
             html += `<tr><td class="header-node"><input type="text" class="node-name-input" value="${personName}" data-type="person" data-idx="${i}"></td>`;
@@ -468,8 +415,6 @@ class AssignmentFormManager {
         };
 
         this.renderResults(result, data);
-
-        // Optimizar y Analizar: dispara inmediatamente el análisis con IA
         this.app.runAIAnalysis();
     }
 
@@ -478,7 +423,6 @@ class AssignmentFormManager {
         this.resValue.textContent = res.totalValue;
         this.resLabel.textContent = this.criterion === 'minimize' ? 'Costo Mínimo Total' : 'Rendimiento Máximo Total';
 
-        // Renderizar lista de asignaciones
         let htmlList = "";
         res.assignments.forEach(([r, c]) => {
             const namePerson = problemData.personNames[r];
@@ -493,7 +437,6 @@ class AssignmentFormManager {
         });
         this.resList.innerHTML = htmlList;
 
-        // Renderizar matriz visual destacada
         let matrixHtml = `<table class="matrix-table"><thead><tr><th></th>`;
         for (let j = 0; j < this.N; j++) {
             matrixHtml += `<th>${problemData.taskNames[j]}</th>`;
@@ -524,11 +467,6 @@ class AssignmentFormManager {
         this.resultsPanel.scrollIntoView({ behavior: 'smooth' });
     }
 }
-
-
-// =============================================================================
-//  CLASE CONTROLADORA PRINCIPAL DE LA APLICACIÓN (SOLO MODIFICADA LA CONEXIÓN A GROQ)
-// =============================================================================
 
 class NexusCoreApp {
     constructor() {
@@ -587,11 +525,6 @@ class NexusCoreApp {
         const drawer = document.getElementById('ai-drawer');
         const btnClose = document.getElementById('btn-close-drawer');
         const btnTrigger = document.getElementById('btn-trigger-ai-run');
-
-        // No existen estos botones en tu HTML, por eso daban error:
-        // const btnAiAnalyze = document.getElementById('btn-ai-analyze');
-        // const btnAiAnalyzeAssign = document.getElementById('btn-ai-analyze-assign');
-
         const openDrawer = () => {
             if (overlay && drawer) {
                 overlay.classList.add('active');
@@ -607,12 +540,6 @@ class NexusCoreApp {
 
         if (btnClose) btnClose.addEventListener('click', closeDrawer);
         if (overlay) overlay.addEventListener('click', closeDrawer);
-
-        // Si tienes botones para abrir el drawer, los debes crear en el HTML.
-        // Como no los veo, comento las líneas problemáticas.
-        // if (btnAiAnalyze) btnAiAnalyze.addEventListener('click', openDrawer);
-        // if (btnAiAnalyzeAssign) btnAiAnalyzeAssign.addEventListener('click', openDrawer);
-
         if (btnTrigger) btnTrigger.addEventListener('click', () => this.runAIAnalysis());
     }
 
@@ -620,21 +547,21 @@ class NexusCoreApp {
         const statusCard = document.getElementById('api-status-card');
 
         if (typeof window.ENV === 'undefined') {
-            console.error("❌ window.ENV no está definido. ¿Se cargó config.js?");
+            console.error("window.ENV no está definido. ¿Se cargó config.js?");
             if (statusCard) statusCard.innerHTML = `<span class="status-dot offline"></span><span class="status-text">Groq IA: config.js no cargado</span>`;
             this.groqApiKey = null;
             return;
         }
 
         const key = window.ENV.GROQ_API_KEY;
-        console.log("🔑 Clave encontrada:", key ? key.substring(0, 15) + "..." : "undefined");
+        console.log("Clave encontrada:", key ? key.substring(0, 15) + "..." : "undefined");
 
         if (key && typeof key === 'string' && key.trim() !== "" && key !== "gsk_TU_CLAVE_API_AQUI" && key.startsWith("gsk_")) {
             this.groqApiKey = key.trim();
-            console.log("✅ API key cargada correctamente");
+            console.log("API key cargada correctamente");
             if (statusCard) statusCard.innerHTML = `<span class="status-dot online"></span><span class="status-text">Groq IA: Conectado</span>`;
         } else {
-            console.error("❌ Clave inválida o marcador");
+            console.error("Clave inválida o marcador");
             if (statusCard) statusCard.innerHTML = `<span class="status-dot offline"></span><span class="status-text">Groq IA: Clave inválida</span>`;
             this.groqApiKey = null;
         }
@@ -642,25 +569,25 @@ class NexusCoreApp {
 
     loadTestCase() {
         if (this.currentView === 'transport') {
-            this.transportManager.originsInput.value = 5;
-            this.transportManager.destsInput.value = 5;
-            this.transportManager.m = 5;
-            this.transportManager.n = 5;
+            this.transportManager.originsInput.value = 3;
+            this.transportManager.destsInput.value = 4;
+            this.transportManager.m = 3;
+            this.transportManager.n = 4;
             const testData = {
-                originNames: ["Planta Norte", "Planta Sur", "Planta Este", "Planta Oeste", "Planta Centro"],
-                destNames: ["Centro GDL", "Centro CDMX", "Centro MTY", "Centro PUE", "Centro QRO"],
-                costs: [[4, 6, 8, 5, 6], [3, 7, 6, 3, 2], [3, 5, 4, 2, 8], [2, 8, 4, 6, 6], [9, 7, 5, 4, 6]],
-                supply: [50, 60, 40, 30, 70],
-                demand: [40, 60, 50, 60, 90]
+                originNames: ["Planta 1", "Planta 2", "Planta 3"],
+                destNames: ["Data Center 1", "Data Center 2", "Data Center 3", "Data Center 4"],
+                costs: [[10, 20, 5, 11], [13, 9, 12, 8], [4, 15, 7, 9]],
+                supply: [250, 400, 350],
+                demand: [200, 300, 250, 250]
             };
             this.transportManager.generateGrid(testData);
         } else {
             this.assignmentManager.sizeInput.value = 4;
             this.assignmentManager.N = 4;
             const testData = {
-                personNames: ["Ing. Carlos", "Dra. Sofía", "Msc. Daniel", "Tec. Lucía"],
-                taskNames: ["Liderazgo I+D", "Desarrollo Cloud", "Análisis Datos", "Soporte DevOps"],
-                matrix: [[90, 85, 75, 60], [85, 95, 80, 70], [70, 80, 85, 90], [65, 75, 80, 95]]
+                personNames: ["Ingeniero 1", "Ingeniero 2", "Ingeniero 3", "Ingeniero 4"],
+                taskNames: ["Modulo 1", "Modulo 2", "Modulo 3", "Modulo 4"],
+                matrix: [[12, 9, 11, 8], [10, 14, 12, 11], [8, 11, 15, 9], [9, 10, 12, 13]]
             };
             this.assignmentManager.generateGrid(testData);
         }
@@ -679,7 +606,7 @@ class NexusCoreApp {
 
         if (!this.groqApiKey) {
             const errorHtml = `<div class="ai-welcome-msg" style="color: var(--danger); text-align: center;">
-                ❌ Error: No se encontró la clave API de Groq.<br>
+                 Error: No se encontró la clave API de Groq.<br>
                 Asegúrate de que el archivo <code>config.js</code> contenga tu clave real:<br>
                 <code>window.ENV = { GROQ_API_KEY: "gsk_tu_clave_real" };</code>
             </div>`;
@@ -722,16 +649,12 @@ class NexusCoreApp {
             outputContainer.innerHTML = `<div class="ai-response-text">${parsedHtml}</div>`;
             if (onPageText) onPageText.innerHTML = parsedHtml;
         } catch (e) {
-            const errorMsg = `<div style="color:var(--danger);">❌ Error: ${e.message}</div>`;
+            const errorMsg = `<div style="color:var(--danger);"> Error: ${e.message}</div>`;
             outputContainer.innerHTML = errorMsg;
             if (onPageText) onPageText.innerHTML = errorMsg;
         }
     }
 
-
-    // ***************************************************************
-    // EXPORTACIÓN PDF: SIN MODIFICAR (EXACTAMENTE IGUAL A TU VERSIÓN ORIGINAL)
-    // ***************************************************************
     exportPDF(type) {
         let sol = null;
         let title = "";
@@ -749,7 +672,6 @@ class NexusCoreApp {
             }
             title = "Reporte de Optimización Logística y Transporte";
 
-            // Build inputs table HTML
             const data = sol.problemData;
             const m = data.costs.length;
             const n = data.costs[0].length;
@@ -772,7 +694,6 @@ class NexusCoreApp {
                 </table>
             `;
 
-            // Build iterations HTML
             const res = sol.solutionData;
             iterationsHtml = `<ul style="font-size:10px; line-height:1.4; color:#334155; padding-left:20px; font-family:sans-serif;">`;
             res.steps.forEach(step => {
@@ -780,7 +701,6 @@ class NexusCoreApp {
             });
             iterationsHtml += `</ul>`;
 
-            // Build outputs table HTML
             const rows = res.balancedCosts.length;
             const cols = res.balancedCosts[0].length;
 
@@ -835,7 +755,6 @@ class NexusCoreApp {
             }
             title = "Reporte de Asignación y Optimización de Talento";
 
-            // Build inputs table HTML
             const data = sol.problemData;
             const N = data.matrix.length;
 
@@ -856,7 +775,6 @@ class NexusCoreApp {
                 </table>
             `;
 
-            // Build iterations HTML
             const res = sol.solutionData;
             iterationsHtml = `<ul style="font-size:10px; line-height:1.4; color:#334155; padding-left:20px; font-family:sans-serif;">`;
             res.assignments.forEach(([r, c]) => {
@@ -867,7 +785,6 @@ class NexusCoreApp {
             });
             iterationsHtml += `</ul>`;
 
-            // Build outputs table HTML
             let outHeaders = `<th></th>` + data.taskNames.map(t => `<th>${t}</th>`).join('');
             let outRows = "";
             for (let i = 0; i < N; i++) {
@@ -907,7 +824,6 @@ class NexusCoreApp {
             aiHtml = document.getElementById('assign-coo-report-text').innerHTML;
         }
 
-        // Generate temporary printing container
         const tempReport = document.createElement('div');
         tempReport.style.padding = "35px";
         tempReport.style.fontFamily = "Arial, sans-serif";
@@ -982,15 +898,12 @@ class NexusCoreApp {
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        // Use html2pdf to download
         html2pdf().set(opt).from(tempReport).save().then(() => {
-            // Cleanup temp element after saving
             document.body.removeChild(tempReport);
         });
     }
 }
 
-// Inicializar la aplicación cuando se cargue el DOM
 document.addEventListener('DOMContentLoaded', () => {
     window.nexusCoreApp = new NexusCoreApp();
 });

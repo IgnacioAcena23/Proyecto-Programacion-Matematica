@@ -1,17 +1,22 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NexusCore Systems - Optimización de Logística y Talento</title>
-    <meta name="description" content="Plataforma de optimización avanzada para transporte logístico y asignación inteligente de talento. NexusCore Systems.">
+    <meta name="description"
+        content="Plataforma de optimización avanzada para transporte logístico y asignación inteligente de talento. NexusCore Systems.">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link rel="stylesheet" href="index.css">
 </head>
+
 <body>
     <div class="app-container">
         <!-- Sidebar Navigation -->
@@ -25,11 +30,23 @@
             </div>
             <nav class="nav-menu">
                 <button class="nav-item active" id="tab-btn-transport">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="1" y="3" width="15" height="13"></rect>
+                        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                        <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                        <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                    </svg>
                     Logística de Transporte
                 </button>
                 <button class="nav-item" id="tab-btn-assignment">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
                     Asignación de Talento
                 </button>
             </nav>
@@ -48,11 +65,17 @@
                 <div class="header-info">
                     <span class="header-tag">Investigación de Operaciones</span>
                     <h2 id="view-title">Optimización Logística de Transporte</h2>
-                    <p id="view-desc">Determina el plan de distribución óptimo mediante métodos clásicos de programación lineal con balanceo en tiempo real.</p>
+                    <p id="view-desc">Determina el plan de distribución óptimo mediante métodos clásicos de programación
+                        lineal con balanceo en tiempo real.</p>
                 </div>
                 <div class="header-actions">
                     <button class="btn btn-secondary" id="btn-load-test">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
                         Cargar Caso de Prueba
                     </button>
                 </div>
@@ -123,18 +146,27 @@
                                 </button>
                             </div>
                             <button class="btn btn-success w-100 mt-4" id="btn-solve-transport">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" style="margin-right:8px;">
+                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                </svg>
                                 Optimizar y Analizar
                             </button>
                         </div>
 
                         <!-- Results Panel -->
-                        <div class="panel card results-card full-width" id="transport-results-panel" style="display: none;">
+                        <div class="panel card results-card full-width" id="transport-results-panel"
+                            style="display: none;">
                             <div class="panel-header">
                                 <h3>Resultados de la Optimización</h3>
                                 <div class="result-actions">
                                     <button class="btn btn-primary btn-sm" id="btn-export-pdf-transport">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2" style="margin-right:6px;">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                            <polyline points="7 10 12 15 17 10"></polyline>
+                                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                                        </svg>
                                         Exportar Reporte PDF
                                     </button>
                                 </div>
@@ -165,9 +197,18 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="coo-report-container" id="trans-coo-report" style="margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 20px; display:none;">
-                                <h4 style="font-family: var(--font-heading); font-size:16px; color: #38bdf8; display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                            <div class="coo-report-container" id="trans-coo-report"
+                                style="margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 20px; display:none;">
+                                <h4
+                                    style="font-family: var(--font-heading); font-size:16px; color: #38bdf8; display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path
+                                            d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+                                        </path>
+                                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                                    </svg>
                                     Reporte de Impacto Operacional (COO)
                                 </h4>
                                 <div class="ai-response-text" id="trans-coo-report-text"></div>
@@ -189,8 +230,10 @@
                             <div class="form-group">
                                 <label>Criterio de Optimización</label>
                                 <div class="toggle-group">
-                                    <button class="toggle-btn active" id="btn-opt-min" data-opt="minimize">Minimizar Costos</button>
-                                    <button class="toggle-btn" id="btn-opt-max" data-opt="maximize">Maximizar Talento</button>
+                                    <button class="toggle-btn active" id="btn-opt-min" data-opt="minimize">Minimizar
+                                        Costos</button>
+                                    <button class="toggle-btn" id="btn-opt-max" data-opt="maximize">Maximizar
+                                        Talento</button>
                                 </div>
                             </div>
                             <button class="btn btn-primary w-100 mt-2" id="btn-generate-assignment">
@@ -214,21 +257,31 @@
                             <h3>Algoritmo de Optimización</h3>
                             <div class="algorithm-info">
                                 <div class="algo-badge">Método Húngaro</div>
-                                <p>Algoritmo combinatorial de optimización que resuelve el problema de asignación en tiempo O(N³) de forma exacta.</p>
+                                <p>Algoritmo combinatorial de optimización que resuelve el problema de asignación en
+                                    tiempo O(N³) de forma exacta.</p>
                             </div>
                             <button class="btn btn-success w-100 mt-4" id="btn-solve-assignment">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" style="margin-right:8px;">
+                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                </svg>
                                 Optimizar y Analizar
                             </button>
                         </div>
 
                         <!-- Results Panel -->
-                        <div class="panel card results-card full-width" id="assignment-results-panel" style="display: none;">
+                        <div class="panel card results-card full-width" id="assignment-results-panel"
+                            style="display: none;">
                             <div class="panel-header">
                                 <h3>Asignaciones de Talento Óptimas</h3>
                                 <div class="result-actions">
                                     <button class="btn btn-primary btn-sm" id="btn-export-pdf-assignment">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2" style="margin-right:6px;">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                            <polyline points="7 10 12 15 17 10"></polyline>
+                                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                                        </svg>
                                         Exportar Reporte PDF
                                     </button>
                                 </div>
@@ -237,7 +290,8 @@
                                 <div class="results-details">
                                     <div class="metric-group">
                                         <div class="metric-card">
-                                            <span class="metric-label" id="assign-result-label">Costo Total Mínimo</span>
+                                            <span class="metric-label" id="assign-result-label">Costo Total
+                                                Mínimo</span>
                                             <span class="metric-value text-indigo" id="res-assign-total-value">0</span>
                                         </div>
                                     </div>
@@ -255,9 +309,18 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="coo-report-container" id="assign-coo-report" style="margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 20px; display:none;">
-                                <h4 style="font-family: var(--font-heading); font-size:16px; color: #6366f1; display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                            <div class="coo-report-container" id="assign-coo-report"
+                                style="margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 20px; display:none;">
+                                <h4
+                                    style="font-family: var(--font-heading); font-size:16px; color: #6366f1; display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path
+                                            d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+                                        </path>
+                                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                                    </svg>
                                     Análisis de Compatibilidad y Productividad de Talento (COO)
                                 </h4>
                                 <div class="ai-response-text" id="assign-coo-report-text"></div>
@@ -274,7 +337,13 @@
     <div class="ai-drawer" id="ai-drawer">
         <div class="drawer-header">
             <div class="drawer-header-title">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" style="margin-right:10px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="9"></line><line x1="9" y1="13" x2="15" y2="13"></line><line x1="9" y1="17" x2="13" y2="17"></line></svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"
+                    style="margin-right:10px;">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="9" y1="9" x2="15" y2="9"></line>
+                    <line x1="9" y1="13" x2="15" y2="13"></line>
+                    <line x1="9" y1="17" x2="13" y2="17"></line>
+                </svg>
                 <h3>Análisis Inteligente Groq AI</h3>
             </div>
             <button class="btn-close" id="btn-close-drawer">&times;</button>
@@ -287,7 +356,8 @@
             <div class="ai-chat-container" id="ai-output-container">
                 <!-- AI Output Here -->
                 <div class="ai-welcome-msg">
-                    Haz clic en el botón de análisis para procesar el problema actual con inteligencia artificial. Esto generará una evaluación estratégica del costo, calidad de solución y pasos a seguir.
+                    Haz clic en el botón de análisis para procesar el problema actual con inteligencia artificial. Esto
+                    generará una evaluación estratégica del costo, calidad de solución y pasos a seguir.
                 </div>
             </div>
         </div>
@@ -305,4 +375,5 @@
     <script src="algorithms.js"></script>
     <script src="app.js"></script>
 </body>
+
 </html>
