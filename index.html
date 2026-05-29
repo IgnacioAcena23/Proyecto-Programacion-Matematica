@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusCore Systems - Optimización de Logística y Talento</title>
+    <meta name="description" content="Plataforma de optimización avanzada para transporte logístico y asignación inteligente de talento. NexusCore Systems.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="app-sidebar">
+            <div class="brand-section">
+                <div class="brand-logo">N</div>
+                <div class="brand-meta">
+                    <h1>NexusCore</h1>
+                    <span>SYSTEMS</span>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <button class="nav-item active" id="tab-btn-transport">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+                    Logística de Transporte
+                </button>
+                <button class="nav-item" id="tab-btn-assignment">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    Asignación de Talento
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="api-key-indicator" id="api-status-card">
+                    <span class="status-dot offline"></span>
+                    <span class="status-text">Groq IA: Sin conectar</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="app-main">
+            <!-- Header -->
+            <header class="app-header">
+                <div class="header-info">
+                    <span class="header-tag">Investigación de Operaciones</span>
+                    <h2 id="view-title">Optimización Logística de Transporte</h2>
+                    <p id="view-desc">Determina el plan de distribución óptimo mediante métodos clásicos de programación lineal con balanceo en tiempo real.</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" id="btn-load-test">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        Cargar Caso de Prueba
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-body">
+                <!-- VIEW 1: TRANSPORTATION PROBLEM -->
+                <section class="view-section active" id="view-transport">
+                    <div class="grid-layout">
+                        <!-- Configuration Card -->
+                        <div class="panel card config-card">
+                            <h3>Parámetros de Entrada</h3>
+                            <div class="input-row">
+                                <div class="form-group">
+                                    <label for="trans-origins">Orígenes (m)</label>
+                                    <input type="number" id="trans-origins" value="3" min="2" max="10">
+                                </div>
+                                <div class="form-group">
+                                    <label for="trans-destinations">Destinos (n)</label>
+                                    <input type="number" id="trans-destinations" value="3" min="2" max="10">
+                                </div>
+                            </div>
+                            <button class="btn btn-primary w-100" id="btn-generate-transport">
+                                Generar Cuadrícula
+                            </button>
+
+                            <div class="balance-widget" id="balance-indicator">
+                                <div class="balance-summary">
+                                    <span class="balance-title">Balance de Carga</span>
+                                    <span class="balance-badge badge-success" id="balance-badge">Balanceado</span>
+                                </div>
+                                <div class="balance-details">
+                                    <div>Oferta Total: <strong id="val-total-supply">0</strong></div>
+                                    <div>Demanda Total: <strong id="val-total-demand">0</strong></div>
+                                </div>
+                                <div class="balance-alert" id="balance-alert-text">
+                                    El problema está equilibrado. No se requieren ajustes.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Grid Entry Card -->
+                        <div class="panel card grid-card">
+                            <div class="panel-header">
+                                <h3>Matriz de Costos y Capacidad</h3>
+                                <button class="btn btn-sm btn-ghost" id="btn-clear-transport">Limpiar Datos</button>
+                            </div>
+                            <div class="matrix-wrapper" id="transport-matrix-container">
+                                <!-- Generated Dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Solver & Results Column -->
+                        <div class="panel card solver-card">
+                            <h3>Método de Resolución</h3>
+                            <div class="solver-select-group">
+                                <button class="solver-option active" data-method="noroeste">
+                                    <span class="solver-title">Esquina Noroeste</span>
+                                    <span class="solver-desc">Asignación secuencial rápida</span>
+                                </button>
+                                <button class="solver-option" data-method="costo_minimo">
+                                    <span class="solver-title">Costo Mínimo</span>
+                                    <span class="solver-desc">Prioriza tarifas más bajas globales</span>
+                                </button>
+                                <button class="solver-option" data-method="vogel">
+                                    <span class="solver-title">Aproximación de Vogel</span>
+                                    <span class="solver-desc">Minimiza penalidades de oportunidad</span>
+                                </button>
+                            </div>
+                            <button class="btn btn-success w-100 mt-4" id="btn-solve-transport">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                Optimizar y Analizar
+                            </button>
+                        </div>
+
+                        <!-- Results Panel -->
+                        <div class="panel card results-card full-width" id="transport-results-panel" style="display: none;">
+                            <div class="panel-header">
+                                <h3>Resultados de la Optimización</h3>
+                                <div class="result-actions">
+                                    <button class="btn btn-primary btn-sm" id="btn-export-pdf-transport">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                        Exportar Reporte PDF
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="results-grid">
+                                <div class="results-details">
+                                    <div class="metric-group">
+                                        <div class="metric-card">
+                                            <span class="metric-label">Costo Total</span>
+                                            <span class="metric-value text-emerald" id="res-total-cost">$0.00</span>
+                                        </div>
+                                        <div class="metric-card">
+                                            <span class="metric-label">Celdas Asignadas</span>
+                                            <span class="metric-value" id="res-cells-count">0</span>
+                                        </div>
+                                    </div>
+                                    <div class="steps-container">
+                                        <h4>Detalle del Proceso Paso a Paso</h4>
+                                        <ul class="steps-list" id="res-steps-list">
+                                            <!-- Dynamically Generated -->
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="results-visual">
+                                    <h4>Plan de Distribución Final</h4>
+                                    <div class="matrix-wrapper" id="transport-result-matrix">
+                                        <!-- Solved Matrix -->
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="coo-report-container" id="trans-coo-report" style="margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 20px; display:none;">
+                                <h4 style="font-family: var(--font-heading); font-size:16px; color: #38bdf8; display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                                    Reporte de Impacto Operacional (COO)
+                                </h4>
+                                <div class="ai-response-text" id="trans-coo-report-text"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 2: ASSIGNMENT PROBLEM -->
+                <section class="view-section" id="view-assignment">
+                    <div class="grid-layout">
+                        <!-- Configuration Card -->
+                        <div class="panel card config-card">
+                            <h3>Parámetros del Problema</h3>
+                            <div class="form-group">
+                                <label for="assign-size">Tamaño de la Matriz (N x N)</label>
+                                <input type="number" id="assign-size" value="3" min="2" max="10">
+                            </div>
+                            <div class="form-group">
+                                <label>Criterio de Optimización</label>
+                                <div class="toggle-group">
+                                    <button class="toggle-btn active" id="btn-opt-min" data-opt="minimize">Minimizar Costos</button>
+                                    <button class="toggle-btn" id="btn-opt-max" data-opt="maximize">Maximizar Talento</button>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary w-100 mt-2" id="btn-generate-assignment">
+                                Generar Cuadrícula
+                            </button>
+                        </div>
+
+                        <!-- Grid Entry Card -->
+                        <div class="panel card grid-card">
+                            <div class="panel-header">
+                                <h3>Matriz de Aptitud / Costos</h3>
+                                <button class="btn btn-sm btn-ghost" id="btn-clear-assignment">Limpiar Datos</button>
+                            </div>
+                            <div class="matrix-wrapper" id="assignment-matrix-container">
+                                <!-- Generated Dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Solver Card -->
+                        <div class="panel card solver-card">
+                            <h3>Algoritmo de Optimización</h3>
+                            <div class="algorithm-info">
+                                <div class="algo-badge">Método Húngaro</div>
+                                <p>Algoritmo combinatorial de optimización que resuelve el problema de asignación en tiempo O(N³) de forma exacta.</p>
+                            </div>
+                            <button class="btn btn-success w-100 mt-4" id="btn-solve-assignment">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                Optimizar y Analizar
+                            </button>
+                        </div>
+
+                        <!-- Results Panel -->
+                        <div class="panel card results-card full-width" id="assignment-results-panel" style="display: none;">
+                            <div class="panel-header">
+                                <h3>Asignaciones de Talento Óptimas</h3>
+                                <div class="result-actions">
+                                    <button class="btn btn-primary btn-sm" id="btn-export-pdf-assignment">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                        Exportar Reporte PDF
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="results-grid">
+                                <div class="results-details">
+                                    <div class="metric-group">
+                                        <div class="metric-card">
+                                            <span class="metric-label" id="assign-result-label">Costo Total Mínimo</span>
+                                            <span class="metric-value text-indigo" id="res-assign-total-value">0</span>
+                                        </div>
+                                    </div>
+                                    <div class="steps-container">
+                                        <h4>Emparejamientos Realizados</h4>
+                                        <ul class="steps-list" id="res-assign-list">
+                                            <!-- Dynamically Generated -->
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="results-visual">
+                                    <h4>Matriz de Coincidencias Resaltada</h4>
+                                    <div class="matrix-wrapper" id="assignment-result-matrix">
+                                        <!-- Solved Matrix -->
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="coo-report-container" id="assign-coo-report" style="margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 20px; display:none;">
+                                <h4 style="font-family: var(--font-heading); font-size:16px; color: #6366f1; display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                                    Análisis de Compatibilidad y Productividad de Talento (COO)
+                                </h4>
+                                <div class="ai-response-text" id="assign-coo-report-text"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- AI Drawer Modal -->
+    <div class="drawer-overlay" id="ai-drawer-overlay"></div>
+    <div class="ai-drawer" id="ai-drawer">
+        <div class="drawer-header">
+            <div class="drawer-header-title">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" style="margin-right:10px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="9"></line><line x1="9" y1="13" x2="15" y2="13"></line><line x1="9" y1="17" x2="13" y2="17"></line></svg>
+                <h3>Análisis Inteligente Groq AI</h3>
+            </div>
+            <button class="btn-close" id="btn-close-drawer">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <div class="ai-model-info">
+                <span>Modelo: <strong>llama-3.1-8b-instant</strong></span>
+                <span class="badge badge-primary">Optimizado para IO</span>
+            </div>
+            <div class="ai-chat-container" id="ai-output-container">
+                <!-- AI Output Here -->
+                <div class="ai-welcome-msg">
+                    Haz clic en el botón de análisis para procesar el problema actual con inteligencia artificial. Esto generará una evaluación estratégica del costo, calidad de solución y pasos a seguir.
+                </div>
+            </div>
+        </div>
+        <div class="drawer-footer">
+            <div class="custom-key-input">
+                <label for="user-api-key">Clave de API Groq (opcional):</label>
+                <input type="password" id="user-api-key" placeholder="gsk_xxxxxxxxxxxxxxxxxxxx">
+            </div>
+            <button class="btn btn-primary" id="btn-trigger-ai-run">Iniciar Análisis IA</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="config.js"></script>
+    <script src="algorithms.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
