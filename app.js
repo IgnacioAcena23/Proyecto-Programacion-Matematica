@@ -656,7 +656,6 @@ class NexusCoreApp {
     }
 
     exportPDF(type) {
-
         let sol = null;
         let title = "";
         let inputHtml = "";
@@ -674,6 +673,7 @@ class NexusCoreApp {
             const m = data.costs.length;
             const n = data.costs[0].length;
 
+            // Tabla de entrada (datos originales)
             let tableHeaders = `<th></th>` + data.destNames.map(d => `<th>${d}</th>`).join('') + `<th>Oferta</th>`;
             let tableRows = "";
             for (let i = 0; i < m; i++) {
@@ -682,8 +682,9 @@ class NexusCoreApp {
                 tableRows += `<td style="color:#10b981; font-weight:bold;">${data.supply[i]}</td>`;
             }
             tableRows += `<tr><td style="font-weight:bold;">Demanda</td>` + data.demand.map(d => `<td style="color:#f59e0b; font-weight:bold;">${d}</td>`).join('') + `<td>—</td>`;
-            inputHtml = `<table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:12px; border:1px solid #cbd5e1;" border="1" cellpadding="6"><thead><tr style="background-color:#f1f5f9; color:#1e293b;">${tableHeaders}<tr></thead><tbody>${tableRows}</tbody></td>`;
+            inputHtml = `<table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:12px; border:1px solid #cbd5e1;" border="1" cellpadding="6"><thead><tr style="background-color:#f1f5f9; color:#1e293b;">${tableHeaders}</tr></thead><tbody>${tableRows}</tbody></table>`;
 
+            // Iteraciones
             const res = sol.solutionData;
             iterationsHtml = `<ul style="font-size:10px; line-height:1.4; color:#334155; padding-left:20px;">`;
             res.steps.forEach(step => {
@@ -691,6 +692,7 @@ class NexusCoreApp {
             });
             iterationsHtml += `</ul>`;
 
+            // Tabla de resultados (solo una tabla)
             const rows = res.balancedCosts.length;
             const cols = res.balancedCosts[0].length;
             let outHeaders = `<th></th>` + res.destNames.map(d => `<th>${d}</th>`).join('') + `<th>Oferta</th>`;
@@ -700,21 +702,25 @@ class NexusCoreApp {
                 for (let j = 0; j < cols; j++) {
                     const qty = res.assignments[i][j];
                     const cost = res.balancedCosts[i][j];
-                    if (qty > 0) outRows += `<td style="background-color:#d1fae5; font-weight:bold; color:#065f46;">${cost} <span style="font-size:10px;">(${qty} uds)</span></td>`;
-                    else outRows += `<td>${cost}</td>`;
+                    if (qty > 0) {
+                        outRows += `<td style="background-color:#d1fae5; font-weight:bold; color:#065f46;">${cost} <span style="font-size:10px;">(${qty} uds)</span></td>`;
+                    } else {
+                        outRows += `<td>${cost}</td>`;
+                    }
                 }
                 const initialSupply = i < m ? data.supply[i] : res.steps.find(s => s.text.includes(res.originNames[i]))?.qty || 0;
-                outRows += `<td>${initialSupply}</td>`;
+                outRows += `<td style="color:#10b981; font-weight:bold;">${initialSupply}</td>`;
             }
             outRows += `<tr><td style="font-weight:bold;">Demanda</td>` + res.destNames.map((d, j) => {
                 const initialDemand = j < n ? data.demand[j] : res.steps.find(s => s.text.includes(d))?.qty || 0;
-                return `<td style="font-weight:bold;">${initialDemand}</td>`;
+                return `<td style="color:#f59e0b; font-weight:bold;">${initialDemand}</td>`;
             }).join('') + `<td>—</td>`;
-            outputHtml = `<table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:12px; border:1px solid #cbd5e1;" border="1" cellpadding="6"><thead><tr style="background-color:#f1f5f9; color:#1e293b;">${outHeaders}</td></thead><tbody>${outRows}</tbody></table>`;
+            outputHtml = `<table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:12px; border:1px solid #cbd5e1;" border="1" cellpadding="6"><thead><tr style="background-color:#f1f5f9; color:#1e293b;">${outHeaders}</tr></thead><tbody>${outRows}</tbody></table>`;
 
             metricHtml = `<div style="display:flex; gap:20px; margin:15px 0;"><div style="flex:1; border:1px solid #cbd5e1; padding:12px; border-radius:6px; background-color:#f8fafc;"><span style="font-size:9px; color:#64748b; font-weight:bold;">Método Utilizado</span><br><strong style="font-size:15px;">${sol.methodName}</strong></div><div style="flex:1; border:1px solid #cbd5e1; padding:12px; border-radius:6px; background-color:#ecfdf5;"><span style="font-size:9px; color:#047857; font-weight:bold;">Costo Total Mínimo</span><br><strong style="font-size:17px; color:#059669;">${formatCurrency(res.totalCost)}</strong></div></div>`;
             aiHtml = document.getElementById('trans-coo-report-text').innerHTML;
         } else {
+            // Asignación (similar, pero sin cambios necesarios)
             sol = this.assignmentManager.lastSolution;
             if (!sol) { alert("Primero debes optimizar el problema."); return; }
             title = "Reporte de Asignación y Optimización de Talento";
@@ -761,97 +767,93 @@ class NexusCoreApp {
         // Construir HTML completo para la ventana emergente
         const timestamp = new Date().toLocaleString('es-ES');
         const fullHtml = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>${title} - NexusCore Systems</title>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-            <style>
-                * { margin: 0; padding: 0; box-sizing: border-box; }
-                body {
-                    font-family: Arial, sans-serif;
-                    background-color: #ffffff;
-                    color: #1e293b;
-                    padding: 35px;
-                    max-width: 800px;
-                    margin: 0 auto;
-                }
-                h1 { font-size: 24px; color: #1e3a8a; margin-bottom: 5px; }
-                .subtitle { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
-                .header { border-bottom: 3px solid #1e3a8a; padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-                .title-section h2 { font-size: 18px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-top: 0; margin-bottom: 15px; text-transform: uppercase; }
-                table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px; border: 1px solid #cbd5e1; }
-                th, td { border: 1px solid #cbd5e1; padding: 6px; text-align: center; }
-                th { background-color: #f1f5f9; font-weight: bold; }
-                .metric-card { flex: 1; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; }
-                .flex { display: flex; gap: 20px; margin: 15px 0; }
-                .bg-success-light { background-color: #ecfdf5; }
-                .bg-indigo-light { background-color: #e0e7ff; }
-                .assigned-cell { background-color: #d1fae5; font-weight: bold; color: #065f46; }
-                .assigned-cell-indigo { background-color: #e0e7ff; font-weight: bold; border: 2px solid #6366f1; }
-                ul { font-size: 10px; line-height: 1.4; color: #334155; padding-left: 20px; margin: 8px 0; }
-                li { margin-bottom: 4px; }
-                .footer { margin-top: 35px; border-top: 1px solid #cbd5e1; padding-top: 10px; text-align: center; font-size: 8px; color: #94a3b8; }
-                #status { text-align: center; margin-top: 20px; font-size: 12px; color: #059669; }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <div>
-                    <h1>NexusCore Systems</h1>
-                    <div class="subtitle">Plataforma de Optimización Operacional</div>
-                </div>
-                <div style="text-align:right; font-size:9px; color:#64748b;">
-                    <strong>Documento de Planificación de Operaciones</strong><br>
-                    Fecha: ${timestamp}<br>
-                    Modelo Analítico: Groq llama-3.1-8b-instant
-                </div>
-            </div>
-            <div class="title-section">
-                <h2>${title}</h2>
-            </div>
-            ${metricHtml}
-            <h3>1. Datos de Entrada del Usuario</h3>
-            <p style="font-size:10px; color:#64748b; margin-bottom:8px;">Matriz de tarifas y restricciones cargadas en el navegador.</p>
-            ${inputHtml}
-            <h3>2. Iteraciones y Pasos de Resolución</h3>
-            <p style="font-size:10px; color:#64748b; margin-bottom:8px;">Desglose de los emparejamientos y asignaciones realizados por el algoritmo.</p>
-            ${iterationsHtml}
-            <h3>3. Matriz de Resultados Final</h3>
-            <p style="font-size:10px; color:#64748b; margin-bottom:8px;">Flujo óptimo y matriz resultante.</p>
-            ${outputHtml}
-            <h3>4. Análisis y Conclusión Final (COO / Groq IA)</h3>
-            <div style="background-color:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; padding:15px; font-size:11px; line-height:1.6;">
-                ${aiHtml || "<p style='color:#64748b; font-style:italic;'>No se realizó análisis cualitativo mediante Groq para este cálculo.</p>"}
-            </div>
-            <div class="footer">
-                Este informe contiene análisis confidencial derivado en tiempo real por NexusCore Systems. © 2026. Todos los derechos reservados.
-            </div>
-            <script>
-                window.onload = function() {
-                    const element = document.body;
-                    const opt = {
-                        margin: 15,
-                        filename: 'NexusCore_Reporte_${type}_${new Date().toISOString().slice(0, 19)}.pdf',
-                        image: { type: 'jpeg', quality: 0.98 },
-                        html2canvas: { scale: 2, useCORS: true, logging: false },
-                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                    };
-                    html2pdf().set(opt).from(element).save().then(() => {
-                        document.getElementById('status').innerHTML = 'PDF generado correctamente. Cerrando ventana...';
-                        setTimeout(() => window.close(), 1500);
-                    }).catch(err => {
-                        document.getElementById('status').innerHTML = 'Error al generar PDF: ' + err.message;
-                        console.error(err);
-                    });
-                };
-            </script>
-        </body>
-        </html>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>${title} - NexusCore Systems</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+            color: #1e293b;
+            padding: 35px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 { font-size: 24px; color: #1e3a8a; margin-bottom: 5px; }
+        .subtitle { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
+        .header { border-bottom: 3px solid #1e3a8a; padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .title-section h2 { font-size: 18px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-top: 0; margin-bottom: 15px; text-transform: uppercase; }
+        table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px; border: 1px solid #cbd5e1; }
+        th, td { border: 1px solid #cbd5e1; padding: 6px; text-align: center; }
+        th { background-color: #f1f5f9; font-weight: bold; }
+        .flex { display: flex; gap: 20px; margin: 15px 0; }
+        .assigned-cell { background-color: #d1fae5; font-weight: bold; color: #065f46; }
+        .assigned-cell-indigo { background-color: #e0e7ff; font-weight: bold; border: 2px solid #6366f1; }
+        ul { font-size: 10px; line-height: 1.4; color: #334155; padding-left: 20px; margin: 8px 0; }
+        li { margin-bottom: 4px; }
+        .footer { margin-top: 35px; border-top: 1px solid #cbd5e1; padding-top: 10px; text-align: center; font-size: 8px; color: #94a3b8; }
+        #status { text-align: center; margin-top: 20px; font-size: 12px; color: #059669; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>NexusCore Systems</h1>
+            <div class="subtitle">Plataforma de Optimización Operacional</div>
+        </div>
+        <div style="text-align:right; font-size:9px; color:#64748b;">
+            <strong>Documento de Planificación de Operaciones</strong><br>
+            Fecha: ${timestamp}<br>
+            Modelo Analítico: Groq llama-3.1-8b-instant
+        </div>
+    </div>
+    <div class="title-section">
+        <h2>${title}</h2>
+    </div>
+    ${metricHtml}
+    <h3>1. Datos de Entrada del Usuario</h3>
+    <p style="font-size:10px; color:#64748b; margin-bottom:8px;">Matriz de tarifas y restricciones cargadas en el navegador.</p>
+    ${inputHtml}
+    <h3>2. Iteraciones y Pasos de Resolución</h3>
+    <p style="font-size:10px; color:#64748b; margin-bottom:8px;">Desglose de los emparejamientos y asignaciones realizados por el algoritmo.</p>
+    ${iterationsHtml}
+    <h3>3. Matriz de Resultados Final</h3>
+    <p style="font-size:10px; color:#64748b; margin-bottom:8px;">Flujo óptimo y matriz resultante.</p>
+    ${outputHtml}
+    <h3 style="page-break-before: always;">4. Análisis y Conclusión Final (COO / Groq IA)</h3>
+    <div style="background-color:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; padding:18px; font-size:11px; line-height:1.6; color:#334155; page-break-inside: avoid;">
+        ${aiHtml || "<p style='color:#64748b; font-style:italic;'>No se realizó análisis cualitativo mediante Groq para este cálculo.</p>"}
+    </div>
+    <div class="footer">
+        Este informe contiene análisis confidencial derivado en tiempo real por NexusCore Systems. © 2026. Todos los derechos reservados.
+    </div>
+    <script>
+        window.onload = function() {
+            const element = document.body;
+            const opt = {
+                margin: 15,
+                filename: 'NexusCore_Reporte_${type}_${new Date().toISOString().slice(0, 19)}.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, logging: false },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save().then(() => {
+                document.getElementById('status').innerHTML = 'PDF generado correctamente. Cerrando ventana...';
+                setTimeout(() => window.close(), 1500);
+            }).catch(err => {
+                document.getElementById('status').innerHTML = 'Error al generar PDF: ' + err.message;
+                console.error(err);
+            });
+        };
+    </script>
+</body>
+</html>
     `;
 
-        // Abrir ventana emergente
         const pdfWindow = window.open('', '_blank');
         if (!pdfWindow) {
             alert("Por favor, permite ventanas emergentes para generar el PDF.");
